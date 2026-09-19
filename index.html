@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <title>¿Me amas?</title>
+    <style>
+      :root {
+        --bg-1: #fff6fa;
+        --bg-2: #ffe3ef;
+        --bg-3: #f1e7ff;
+        --pink-1: #ff8db4;
+        --pink-2: #ff5fa6;
+        --pink-3: #ff3f7d;
+        --rose: #f43f80;
+        --violet-1: #d9b3ff;
+        --violet-2: #a574ff;
+        --dark-1: #0d1020;
+        --dark-2: #1c1a2d;
+        --dark-3: #2d233c;
+        --text: #4d1d3d;
+        --white-soft: rgba(255, 255, 255, 0.85);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        font-family: "Segoe UI", "Arial", sans-serif;
+        background: linear-gradient(135deg, var(--bg-1), var(--bg-2) 46%, var(--bg-3));
+        color: var(--text);
+        overflow-x: hidden;
+        transition: background 4s ease, color 4s ease;
+      }
+
+      body {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body.dark-mode {
+        background: linear-gradient(135deg, #0b0d14, #171827 35%, #231f32 100%);
+      }
+
+      .app {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 24px 18px 36px;
+      }
+
+      .screen {
+        position: relative;
+        z-index: 3;
+        width: min(92vw, 460px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .start-screen {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+
+      .start-screen.hidden {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.96);
+        pointer-events: none;
+      }
+
+      .question {
+        margin: 0 0 28px;
+        font-size: clamp(3rem, 8vw, 5.4rem);
+        line-height: 0.96;
+        font-weight: 900;
+        letter-spacing: -0.07em;
+        color: #b62c6c;
+        text-shadow: 0 12px 28px rgba(240, 94, 153, 0.24);
+      }
+
+      .button-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .choice-btn {
+        position: relative;
+        border: none;
+        border-radius: 999px;
+        min-width: min(72vw, 206px);
+        padding: 15px 24px;
+        cursor: pointer;
+        color: var(--text);
+        font-weight: 800;
+        font-size: clamp(1.08rem, 3.8vw, 1.32rem);
+        letter-spacing: 0.01em;
+        background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,225,236,0.82));
+        box-shadow: 0 13px 28px rgba(191, 73, 130, 0.18), inset 0 1px 1px rgba(255,255,255,0.8);
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+      }
+
+      .choice-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,120,170,0.1));
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      .choice-btn:hover,
+      .choice-btn:focus-visible,
+      .choice-btn:active {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 18px 28px rgba(191, 73, 130, 0.24), inset 0 1px 1px rgba(255,255,255,0.7);
+        filter: saturate(1.1);
+      }
+
+      .choice-btn:hover::before,
+      .choice-btn:focus-visible::before,
+      .choice-btn:active::before {
+        opacity: 1;
+      }
+
+      .choice-btn.primary {
+        background: linear-gradient(135deg, #ff9ec1 0%, #ff6ea4 42%, #d75ed8 100%);
+        color: white;
+      }
+
+      .choice-btn.danger {
+        background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(212,214,255,0.8));
+        color: #592a4f;
+      }
+
+      .answer-screen {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.7s ease;
+      }
+
+      .answer-screen.show {
+        opacity: 1;
+        pointer-events: none;
+      }
+
+      .answer-screen.show-no {
+        pointer-events: auto;
+      }
+
+      .love-message {
+        position: relative;
+        z-index: 3;
+        margin: 0;
+        padding: 0 16px;
+        font-size: clamp(2.8rem, 9vw, 6rem);
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: -0.06em;
+        color: #f43f80;
+        text-shadow: 0 12px 26px rgba(255, 123, 170, 0.28);
+        opacity: 0;
+        transform: translateX(130vw) scale(0.4);
+      }
+
+      .answer-screen.show-yes .love-message {
+        animation: messageReveal 2.65s cubic-bezier(0.15, 0.78, 0.22, 1) forwards;
+      }
+
+      @keyframes messageReveal {
+        0% {
+          opacity: 0;
+          transform: translateX(120vw) scale(0.4);
+        }
+        14% {
+          opacity: 1;
+        }
+        52% {
+          opacity: 1;
+          transform: translateX(0) scale(1.75);
+        }
+        74% {
+          opacity: 1;
+          transform: translateX(0) scale(1.14);
+        }
+        88% {
+          opacity: 1;
+          transform: translateX(0) scale(1.22);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0) scale(1.2);
+        }
+      }
+
+      .heart-scene,
+      .sad-scene {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .heart-scene {
+        opacity: 0;
+        transition: opacity 0.8s ease;
+      }
+
+      .answer-screen.show-yes .heart-scene {
+        opacity: 1;
+      }
+
+      .love-word-layer,
+      .floating-layer,
+      .spark-layer,
+      .sad-emoji-layer {
+        position: absolute;
+        inset: 0;
+      }
+
+      .love-word {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: translate(-50%, -50%) scale(0.2) rotate(var(--rot));
+        opacity: 0;
+        color: rgba(255, 108, 162, 0.82);
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-shadow: 0 8px 20px rgba(255, 104, 162, 0.2);
+        background: linear-gradient(135deg, #ffb6d5, #ff5ea8, #9a71ff, #79d7ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: heartWordIn 1.2s ease forwards;
+        animation-delay: var(--delay);
+      }
+
+      @keyframes heartWordIn {
+        0% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) scale(0.2) rotate(var(--rot));
+        }
+        20% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1) rotate(var(--rot));
+        }
+      }
+
+      .love-word.floating {
+        color: rgba(218, 99, 164, 0.81);
+        animation: floatingWord 5.6s ease-in-out infinite alternate;
+      }
+
+      @keyframes floatingWord {
+        0% {
+          transform: translate(var(--x), var(--y)) scale(0.9) rotate(var(--rot));
+        }
+        100% {
+          transform: translate(var(--x), calc(var(--y) - 20px)) scale(1.08) rotate(calc(var(--rot) + 9deg));
+        }
+      }
+
+      .spark,
+      .mini-heart {
+        position: absolute;
+        display: block;
+      }
+
+      .spark {
+        left: 50%;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(255,127,181,0.8), rgba(255,127,181,0));
+        opacity: 0.2;
+        animation: sparkle 4.6s ease-in-out infinite;
+      }
+
+      @keyframes sparkle {
+        0%, 100% {
+          opacity: 0.12;
+          transform: translate(var(--x), var(--y)) scale(0.7);
+        }
+        50% {
+          opacity: 0.9;
+          transform: translate(var(--x), calc(var(--y) - 18px)) scale(1.4);
+        }
+      }
+
+      .mini-heart {
+        color: rgba(255, 124, 182, 0.8);
+        font-size: 14px;
+        text-shadow: 0 0 18px rgba(255, 176, 204, 0.45);
+        animation: drift 7s ease-in-out infinite;
+      }
+
+      @keyframes drift {
+        0% {
+          opacity: 0.1;
+          transform: translate3d(0, 0, 0) scale(0.8);
+        }
+        18% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 0.9;
+          transform: translate3d(var(--dx), calc(var(--dy) - 18px), 0) scale(1.06);
+        }
+        100% {
+          opacity: 0.2;
+          transform: translate3d(calc(var(--dx) * -0.45), calc(var(--dy) * -0.7), 0) scale(0.94);
+        }
+      }
+
+      .sad-scene {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .answer-screen.show-no .sad-scene {
+        opacity: 1;
+      }
+
+      .sad-text {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        margin: 0;
+        font-size: clamp(2.8rem, 10vw, 6rem);
+        line-height: 1;
+        letter-spacing: -0.06em;
+        font-weight: 900;
+        color: #edf1ff;
+        text-shadow: 0 12px 32px rgba(107, 122, 204, 0.24);
+        animation: sadPop 1.8s ease-out forwards;
+      }
+
+      @keyframes sadPop {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -30%) scale(0.65);
+        }
+        55% {
+          opacity: 1;
+          transform: translate(-50%, -52%) scale(1.08);
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      .sad-emoji {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        font-size: clamp(1.4rem, 4vw, 2.2rem);
+        opacity: 0;
+        animation: sadFloat 4.8s ease-in-out infinite;
+      }
+
+      @keyframes sadFloat {
+        0% {
+          opacity: 0.1;
+          transform: translate(var(--x), var(--y)) scale(0.8) rotate(var(--rot));
+        }
+        30% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 0.7;
+          transform: translate(calc(var(--x) * 0.8), calc(var(--y) - 38px)) scale(1.1) rotate(calc(var(--rot) + 10deg));
+        }
+      }
+
+      .retry-btn {
+        position: absolute;
+        left: 50%;
+        bottom: 46px;
+        transform: translateX(-50%) translateY(18px);
+        border: none;
+        border-radius: 999px;
+        padding: 14px 22px;
+        background: linear-gradient(135deg, #ffd8ea, #ff8bb7 50%, #d8b4ff);
+        color: #4d1d3d;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 14px 28px rgba(185, 86, 142, 0.24);
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+
+      .retry-btn.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .answer-screen.show-no .retry-btn {
+        pointer-events: auto;
+      }
+
+      @media (max-width: 560px) {
+        .button-row {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .choice-btn {
+          width: min(74vw, 290px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="screen start-screen" id="startScreen">
+        <h1 class="question" id="questionTitle">¿Me amas?</h1>
+        <div class="button-row">
+          <button class="choice-btn" data-action="yes-simple" type="button">Sí ❤️</button>
+          <button class="choice-btn primary" data-action="yes-heavy" type="button">Sí, muchísimo ❤️</button>
+          <button class="choice-btn danger" data-action="no" type="button">No 😭</button>
+        </div>
+      </div>
+
+      <div class="answer-screen" id="answerScreen" aria-live="polite">
+        <h2 class="love-message" id="loveMessage">YO MAAAAS ❤️</h2>
+
+        <div class="heart-scene" id="heartScene" aria-hidden="true">
+          <div class="love-word-layer" id="loveWordLayer"></div>
+          <div class="floating-layer" id="floatingLayer"></div>
+          <div class="spark-layer" id="sparkLayer"></div>
+        </div>
+
+        <div class="sad-scene" id="sadScene" aria-hidden="true">
+          <h3 class="sad-text" id="sadText">¿Por qué? 😭</h3>
+          <div class="sad-emoji-layer" id="sadEmojiLayer"></div>
+        </div>
+
+        <button class="retry-btn" id="retryBtn" type="button">Intentar otra vez ❤️</button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const startScreen = document.getElementById('startScreen');
+        const answerScreen = document.getElementById('answerScreen');
+        const loveMessage = document.getElementById('loveMessage');
+        const loveWordLayer = document.getElementById('loveWordLayer');
+        const floatingLayer = document.getElementById('floatingLayer');
+        const sparkLayer = document.getElementById('sparkLayer');
+        const sadEmojiLayer = document.getElementById('sadEmojiLayer');
+        const retryBtn = document.getElementById('retryBtn');
+        const questionTitle = document.getElementById('questionTitle');
+        const defaultQuestion = '¿Me amas?';
+        const buttons = document.querySelectorAll('.choice-btn');
+
+        function clearLayers() {
+          loveWordLayer.innerHTML = '';
+          floatingLayer.innerHTML = '';
+          sparkLayer.innerHTML = '';
+          sadEmojiLayer.innerHTML = '';
+        }
+
+        function resetScene() {
+          startScreen.classList.remove('hidden');
+          answerScreen.classList.remove('show', 'show-yes', 'show-no');
+          retryBtn.classList.remove('visible');
+          clearLayers();
+          document.body.classList.remove('dark-mode');
+          questionTitle.textContent = defaultQuestion;
+          loveMessage.textContent = 'YO MAAAAS ❤️';
+        }
+
+        function createJoyParticles() {
+          const particles = 18;
+          sparkLayer.innerHTML = '';
+
+          for (let i = 0; i < particles; i += 1) {
+            const spark = document.createElement('span');
+            spark.className = 'spark';
+            spark.style.left = (Math.random() * 100) + '%';
+            spark.style.top = (Math.random() * 100) + '%';
+            spark.style.setProperty('--x', ((Math.random() * 30) - 15) + 'px');
+            spark.style.setProperty('--y', ((Math.random() * 30) - 15) + 'px');
+            spark.style.opacity = (0.2 + Math.random() * 0.7).toFixed(2);
+            spark.style.animationDelay = (Math.random() * 2.8) + 's';
+            sparkLayer.appendChild(spark);
+          }
+
+          const floatingHearts = 14;
+          for (let i = 0; i < floatingHearts; i += 1) {
+            const heart = document.createElement('span');
+            heart.className = 'mini-heart';
+            heart.textContent = '♥';
+            heart.style.left = (Math.random() * 100) + '%';
+            heart.style.top = (Math.random() * 100) + '%';
+            heart.style.setProperty('--dx', ((Math.random() * 32) - 16) + 'px');
+            heart.style.setProperty('--dy', ((Math.random() * 24) - 12) + 'px');
+            heart.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2);
+            heart.style.fontSize = (10 + Math.random() * 14) + 'px';
+            heart.style.animationDelay = (Math.random() * 2.2) + 's';
+            sparkLayer.appendChild(heart);
+          }
+        }
+
+        function createSimpleJoy() {
+          clearLayers();
+          createJoyParticles();
+          floatingLayer.innerHTML = '';
+          loveWordLayer.innerHTML = '';
+        }
+
+        function buildHeartPoints() {
+          const points = [];
+          const total = 200;
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2 + 18;
+          const scale = Math.min(window.innerWidth / 52, window.innerHeight / 23, 10);
+
+          for (let i = 0; i < total; i += 1) {
+            const t = (i / total) * Math.PI * 2;
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+            const cssY = -y;
+            const px = centerX + x * scale;
+            const py = centerY + cssY * scale * 0.9;
+            points.push({ x: px, y: py });
+          }
+
+          return points;
+        }
+
+        function createHeartFromWords() {
+          const points = buildHeartPoints();
+          loveWordLayer.innerHTML = '';
+
+          points.forEach(function (point, index) {
+            const word = document.createElement('span');
+            word.className = 'love-word';
+            word.textContent = 'te amo';
+            word.style.left = point.x + 'px';
+            word.style.top = point.y + 'px';
+            word.style.fontSize = (12 + (index % 12) * 1.2) + 'px';
+            word.style.setProperty('--rot', ((Math.random() * 32) - 16) + 'deg');
+            word.style.setProperty('--sx', ((Math.random() * 90) - 45) + 'px');
+            word.style.setProperty('--sy', ((Math.random() * 90) - 45) + 'px');
+            word.style.setProperty('--delay', (index * 0.01) + 's');
+            const hue = 330 + (index % 12) * 16;
+            word.style.color = 'hsl(' + hue + ', 86%, 65%)';
+            loveWordLayer.appendChild(word);
+          });
+        }
+
+        function createFloatingWords() {
+          floatingLayer.innerHTML = '';
+          const count = 22;
+
+          for (let i = 0; i < count; i += 1) {
+            const word = document.createElement('span');
+            word.className = 'love-word floating';
+            word.textContent = 'te amo';
+            word.style.fontSize = (12 + Math.random() * 18) + 'px';
+            word.style.left = (window.innerWidth / 2 + ((Math.random() * 200) - 100)) + 'px';
+            word.style.top = (window.innerHeight / 2 + ((Math.random() * 220) - 110)) + 'px';
+            word.style.setProperty('--x', ((Math.random() * 150) - 75) + 'px');
+            word.style.setProperty('--y', ((Math.random() * 150) - 75) + 'px');
+            word.style.setProperty('--rot', ((Math.random() * 60) - 30) + 'deg');
+            word.style.opacity = '0.7';
+            floatingLayer.appendChild(word);
+          }
+        }
+
+        function createSadEmojis() {
+          sadEmojiLayer.innerHTML = '';
+          const emojis = ['😭', '🥺', '💔', '😔', '😭', '🥺', '💔', '😔'];
+
+          emojis.forEach(function (emoji, index) {
+            const el = document.createElement('span');
+            el.className = 'sad-emoji';
+            el.textContent = emoji;
+            const angle = (index / emojis.length) * Math.PI * 2;
+            const radius = 90 + (index % 3) * 28;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            el.style.left = '50%';
+            el.style.top = '50%';
+            el.style.setProperty('--x', x + 'px');
+            el.style.setProperty('--y', y + 'px');
+            el.style.setProperty('--rot', ((Math.random() * 30) - 15) + 'deg');
+            el.style.animationDelay = (index * 0.3) + 's';
+            sadEmojiLayer.appendChild(el);
+          });
+        }
+
+        function handleYesSimple() {
+          startScreen.classList.add('hidden');
+          answerScreen.classList.add('show', 'show-yes');
+          answerScreen.classList.remove('show-no');
+          document.body.classList.remove('dark-mode');
+          loveMessage.textContent = 'YO MAAAAS ❤️';
+          clearLayers();
+          createSimpleJoy();
+          retryBtn.classList.remove('visible');
+        }
+
+        function handleYesHeavy() {
+          startScreen.classList.add('hidden');
+          answerScreen.classList.add('show', 'show-yes');
+          answerScreen.classList.remove('show-no');
+          document.body.classList.remove('dark-mode');
+          loveMessage.textContent = 'YO MAAAAS ❤️';
+          clearLayers();
+          createJoyParticles();
+          createFloatingWords();
+          createHeartFromWords();
+          retryBtn.classList.remove('visible');
+        }
+
+        function handleNo() {
+          startScreen.classList.add('hidden');
+          answerScreen.classList.add('show', 'show-no');
+          answerScreen.classList.remove('show-yes');
+          document.body.classList.add('dark-mode');
+          questionTitle.textContent = '¿Me amas? 😭';
+          clearLayers();
+          createSadEmojis();
+          retryBtn.classList.add('visible');
+        }
+
+        buttons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            const action = button.dataset.action;
+
+            if (action === 'yes-simple') {
+              handleYesSimple();
+            } else if (action === 'yes-heavy') {
+              handleYesHeavy();
+            } else if (action === 'no') {
+              handleNo();
+            }
+          });
+        });
+
+        retryBtn.addEventListener('click', function () {
+          resetScene();
+        });
+
+        window.addEventListener('resize', function () {
+          if (answerScreen.classList.contains('show') && !answerScreen.classList.contains('show-no')) {
+            if (document.querySelector('.love-word')) {
+              createHeartFromWords();
+            }
+          }
+        });
+
+        resetScene();
+      })();
+    </script>
+  </body>
+</html>
